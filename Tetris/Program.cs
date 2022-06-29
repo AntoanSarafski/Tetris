@@ -53,11 +53,7 @@ namespace Tetris
             Console.WriteLine(endLine);
         }
 
-        static void Write(
-            string text,
-            int row,
-            int col,
-            ConsoleColor color = ConsoleColor.Yellow)
+        static void Write(string text,int row,int col,ConsoleColor color = ConsoleColor.Yellow)
         {
             Console.ForegroundColor = color;
             Console.SetCursorPosition(col, row);
