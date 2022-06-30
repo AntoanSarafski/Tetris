@@ -120,17 +120,20 @@ namespace Tetris
                 }
                 if (Collision())
                 {
-                    CurrentFigure = TetrisFigures[Random.Next(0, TetrisFigures.Count)];
-                    // AddCurrentFigure()
+
+                    AddCurrentFigureToTetrisField();
                     // CheckForFullLines()
                     // if(lines remove) 
                     // 10, 30, 60, 100
+                    CurrentFigure = TetrisFigures[Random.Next(0, TetrisFigures.Count)];
+                    CurrentFigureRow = 0;
+                    CurrentFigureCol = 0;
                 }
 
                 // redraw UI
                 DrawBoard();
                 DrawInfo();
-                // TODO: DrawTetrisField()
+                DrawTetrisField();
                 DrawCurrentFigure();
 
                 
@@ -138,11 +141,31 @@ namespace Tetris
             }
         }
 
+
+
+        static void AddCurrentFigureToTetrisField()
+        {
+            for (int row = 0; row < CurrentFigure.GetLength(0); row++)
+            {
+                for (int col = 0; col < CurrentFigure.GetLength(1); col++)
+                {
+                    if (CurrentFigure[row, col])
+                    {
+                        TetrisField[CurrentFigureRow + row, CurrentFigureCol + col] = true;
+                    }
+                }
+            }
+        }
+
         static bool Collision()
         {
-            if (CurrentFigureRow + CurrentFigure.GetLength(0)  == TetrisRows)
+            // TODO: Collide with existing figures.
+             if (CurrentFigureRow + CurrentFigure.GetLength(0)  == TetrisRows)
             {
-                return true;
+                if (CurrentFigureRow + CurrentFigure.GetLength(0) == TetrisRows)
+                {
+                    return true;
+                }
             }
             return false;
         }
@@ -190,6 +213,20 @@ namespace Tetris
             Write("Keys:", 10, 3 + TetrisCols);
             Write($"    ^ ", 11, 3 + TetrisCols);
             Write($" <  v  > ", 12, 3 + TetrisCols);
+        }
+
+        static void DrawTetrisField()
+        {
+            for (int row = 0; row < TetrisRows; row++)
+            {
+                for (int col = 0; col < TetrisCols; col++)
+                {
+                    if (TetrisField[row, col])
+                    {
+                        Write("*", row + 1, col + 1);
+                    }
+                }
+            }
         }
 
         static void DrawCurrentFigure()
