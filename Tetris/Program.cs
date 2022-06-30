@@ -128,6 +128,17 @@ namespace Tetris
                     CurrentFigure = TetrisFigures[Random.Next(0, TetrisFigures.Count)];
                     CurrentFigureRow = 0;
                     CurrentFigureCol = 0;
+                    if (Collision())
+                    {
+                        var scoreAsStrign = Score.ToString();
+                        scoreAsStrign += new string(' ', 7 - scoreAsStrign.Length);
+                        Write("╔═════════╗", 5, 5);
+                        Write("║ Game    ║", 6, 5);
+                        Write("║   Over! ║", 7, 5);
+                        Write($"║ {scoreAsStrign} ║", 8, 5);
+                        Write("╚═════════╝", 9, 5);
+                        Console.ReadKey();
+                    }
                 }
 
                 // redraw UI
