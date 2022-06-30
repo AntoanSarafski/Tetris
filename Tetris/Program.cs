@@ -162,9 +162,17 @@ namespace Tetris
             // TODO: Collide with existing figures.
              if (CurrentFigureRow + CurrentFigure.GetLength(0)  == TetrisRows)
             {
-                if (CurrentFigureRow + CurrentFigure.GetLength(0) == TetrisRows)
+                 return true;
+            }
+
+            for (int row = 0; row < CurrentFigure.GetLength(0); row++)
+            {
+                for (int col = 0; col < CurrentFigure.GetLength(1); col++)
                 {
-                    return true;
+                    if (CurrentFigure[row,col] && TetrisField[CurrentFigureRow + row + 1, CurrentFigureCol + col])
+                    {
+                        return true;
+                    }
                 }
             }
             return false;
