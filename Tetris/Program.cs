@@ -67,6 +67,8 @@ namespace Tetris
 
         static void Main(string[] args)
         {
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
             if (File.Exists(ScoresFileName))
             {
                 var allScores = File.ReadAllLines(ScoresFileName);
@@ -121,7 +123,7 @@ namespace Tetris
                         || key.Key == ConsoleKey.W
                         || key.Key == ConsoleKey.UpArrow)
                     {
-                        // TODO: Implement 90-degree rotation of the current figure.
+                        RotateCurrentFigure();
                     }
                 }
 
@@ -173,6 +175,19 @@ namespace Tetris
             }
         }
 
+        private static void RotateCurrentFigure()
+        {
+            var newFigure = new bool[CurrentFigure.GetLength(1), CurrentFigure.GetLength(0)];
+            for (int row = 0; row < CurrentFigure.GetLength(0); row++)
+            {
+                for (int col = 0; col < CurrentFigure.GetLength(1); col++)
+                {
+                    newFigure[col, CurrentFigure.GetLength(0) - row - 1] = CurrentFigure[row, col];
+                }
+            }
+            CurrentFigure = newFigure;
+        }
+
         private static int CheckForFullLines()
         {
             int lines = 0;
@@ -191,9 +206,12 @@ namespace Tetris
 
                 if (rowIsFull)
                 {
-                    for (int rowToMove = 0; rowToMove < TetrisField.GetLength(0); rowToMove++)
+                    for (int rowToMove = row ; rowToMove >= 1; rowToMove--)
                     {
-
+                        for (int col = 0; col < TetrisField.GetLength(1); col++)
+                        {
+                            TetrisField[rowToMove, col] = TetrisField[rowToMove - 1, col];
+                        }
                     }
 
                     lines++;
@@ -292,13 +310,19 @@ namespace Tetris
         {
             for (int row = 0; row < TetrisRows; row++)
             {
+                string line = "";
                 for (int col = 0; col < TetrisCols; col++)
                 {
                     if (TetrisField[row, col])
                     {
-                        Write("*", row + 1, col + 1);
+                        line += "*";
+                    }
+                    else
+                    {
+                        line += " ";
                     }
                 }
+                Write(line, row + 1, 1);
             }
         }
 
@@ -309,6 +333,7 @@ namespace Tetris
             {
                 for (int col = 0; col < CurrentFigure.GetLength(1); col++)
                 {
+
                     if (CurrentFigure[row, col])
                     {
                         Write("*", row + 1 + CurrentFigureRow, col + 1 + CurrentFigureCol);
@@ -317,9 +342,8 @@ namespace Tetris
             }
         }
 
-        static void Write(string text,int row,int col,ConsoleColor color = ConsoleColor.DarkRed)
+        static void Write(string text,int row,int col)
         {
-            Console.ForegroundColor = color;
             Console.SetCursorPosition(col, row);
             Console.Write(text);
             Console.ResetColor();
