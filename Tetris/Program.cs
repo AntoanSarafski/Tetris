@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Tetris
@@ -50,8 +52,10 @@ namespace Tetris
                 {true, true, true, }
             }, 
         };
+        static string ScoresFileName = "scores.txt";
 
         // State
+        static int HighScore = 0;
         static int Score = 0;
         static int Frame = 0;
         static int FramesToMoVeFigure = 15;
@@ -63,6 +67,16 @@ namespace Tetris
 
         static void Main(string[] args)
         {
+            if (File.Exists(ScoresFileName))
+            {
+                var allScores = File.ReadAllLines(ScoresFileName);
+                foreach (var score in allScores)
+                {
+                    var match = Regex.Match(score, @" => (?<score>[0-9]+)");
+                    HighScore = Math.Max(HighScore, int.Parse(match.Groups["score"].Value));
+                }
+            }
+
             Console.Title = "Tetris v1.0";
             Console.CursorVisible = false;
             // Console.WindowHeight = ConsoleRows + 1;
@@ -130,6 +144,10 @@ namespace Tetris
                     CurrentFigureCol = 0;
                     if (Collision())
                     {
+                        File.AppendAllLines(ScoresFileName, new List<string>
+                        {
+                            $"[{DateTime.Now.ToString()}] {Environment.UserName} => {Score}"
+                        });
                         var scoreAsStrign = Score.ToString();
                         scoreAsStrign += new string(' ', 7 - scoreAsStrign.Length);
                         Write("╔═════════╗", 5, 5);
@@ -137,7 +155,8 @@ namespace Tetris
                         Write("║   Over! ║", 7, 5);
                         Write($"║ {scoreAsStrign} ║", 8, 5);
                         Write("╚═════════╝", 9, 5);
-                        Console.ReadKey();
+                        Thread.Sleep(100000);
+                        Environment.Exit(0);
                     }
                 }
 
@@ -223,15 +242,22 @@ namespace Tetris
 
         static void DrawInfo()
         {
+            if (Score > HighScore)
+            {
+                HighScore = Score;
+            }
+
             Write("Score:", 1, 3 + TetrisCols);
             Write(Score.ToString(), 2, 3 + TetrisCols);
-            Write("Frame:", 4, 3 + TetrisCols);
-            Write(Frame.ToString(), 5, 3 + TetrisCols);
-            Write("Position:", 7, 3 + TetrisCols);
-            Write($"{CurrentFigureRow}, {CurrentFigureCol}", 8, 3 + TetrisCols);
-            Write("Keys:", 10, 3 + TetrisCols);
-            Write($"    ^ ", 11, 3 + TetrisCols);
-            Write($" <  v  > ", 12, 3 + TetrisCols);
+            Write("Best:", 4, 3 + TetrisCols);
+            Write(HighScore.ToString(), 5, 3 + TetrisCols);
+            Write("Frame:", 7, 3 + TetrisCols);
+            Write(Frame.ToString(), 8, 3 + TetrisCols);
+            Write("Position:", 10, 3 + TetrisCols);
+            Write($"{CurrentFigureRow}, {CurrentFigureCol}", 11, 3 + TetrisCols);
+            Write("Keys:", 13, 3 + TetrisCols);
+            Write($"    ^ ", 14, 3 + TetrisCols);
+            Write($" <  v  > ", 15, 3 + TetrisCols);
         }
 
         static void DrawTetrisField()
