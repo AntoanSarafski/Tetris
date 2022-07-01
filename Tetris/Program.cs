@@ -53,7 +53,7 @@ namespace Tetris
             }, 
         };
         static string ScoresFileName = "scores.txt";
-
+        static int[] ScorePerLines = { 0, 40, 100, 300, 1200 };
         // State
         static int HighScore = 0;
         static int Score = 0;
@@ -136,6 +136,8 @@ namespace Tetris
                 {
 
                     AddCurrentFigureToTetrisField();
+                    int lines = CheckForFullLines();
+                    Score += ScorePerLines[lines];
                     // CheckForFullLines()
                     // if(lines remove) 
                     // 10, 30, 60, 100
@@ -171,7 +173,34 @@ namespace Tetris
             }
         }
 
+        private static int CheckForFullLines()
+        {
+            int lines = 0;
 
+            for (int row = 0; row < TetrisField.GetLength(0); row++)
+            {
+                bool rowIsFull = true;
+                for (int col = 0; col < TetrisField.GetLength(1); col++)
+                {
+                    if (TetrisField[row, col] == false)
+                    {
+                        rowIsFull = false;
+                        break;
+                    }
+                }
+
+                if (rowIsFull)
+                {
+                    for (int rowToMove = 0; rowToMove < TetrisField.GetLength(0); rowToMove++)
+                    {
+
+                    }
+
+                    lines++;
+                }
+            }
+            return lines;
+        }
 
         static void AddCurrentFigureToTetrisField()
         {
@@ -189,7 +218,6 @@ namespace Tetris
 
         static bool Collision()
         {
-            // TODO: Collide with existing figures.
              if (CurrentFigureRow + CurrentFigure.GetLength(0)  == TetrisRows)
             {
                  return true;
