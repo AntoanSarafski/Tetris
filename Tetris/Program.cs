@@ -59,7 +59,7 @@ namespace Tetris
         static int Score = 0;
         static int Frame = 0;
         static int Level = 1;
-        static int FramesToMoVeFigure = 15;
+        static int FramesToMoVeFigure = 16;
         static bool[,] CurrentFigure = null; //TODO: Random.Next
         static int CurrentFigureRow = 0;
         static int CurrentFigureCol = 0;
@@ -92,8 +92,7 @@ namespace Tetris
             while (true)
             {
                 Frame++;
-                //UpdateLevel();
-                // user input
+                UpdateLevel();
                 if (Console.KeyAvailable)
                 {
                     var key = Console.ReadKey();
@@ -130,7 +129,7 @@ namespace Tetris
                 }
 
                 // Update the game state
-                if (Frame % FramesToMoVeFigure == 0)
+                if (Frame % (FramesToMoVeFigure - Level) == 0)
                 {
                     CurrentFigureRow++;
                     Frame = 0;
@@ -376,7 +375,7 @@ namespace Tetris
         {
             Console.SetCursorPosition(col, row);
             Console.Write(text);
-            Console.ResetColor();
+            //Console.ResetColor();
         }
     }
 }
