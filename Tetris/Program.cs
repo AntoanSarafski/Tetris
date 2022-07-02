@@ -58,6 +58,7 @@ namespace Tetris
         static int HighScore = 0;
         static int Score = 0;
         static int Frame = 0;
+        static int Level = 1;
         static int FramesToMoVeFigure = 15;
         static bool[,] CurrentFigure = null; //TODO: Random.Next
         static int CurrentFigureRow = 0;
@@ -91,6 +92,7 @@ namespace Tetris
             while (true)
             {
                 Frame++;
+                //UpdateLevel();
                 // user input
                 if (Console.KeyAvailable)
                 {
@@ -134,19 +136,19 @@ namespace Tetris
                     Frame = 0;
                     
                 }
-                if (Collision())
+                if (Collision(CurrentFigure))
                 {
 
                     AddCurrentFigureToTetrisField();
                     int lines = CheckForFullLines();
-                    Score += ScorePerLines[lines];
+                    Score += ScorePerLines[lines]* Level;
                     // CheckForFullLines()
                     // if(lines remove) 
                     // 10, 30, 60, 100
                     CurrentFigure = TetrisFigures[Random.Next(0, TetrisFigures.Count)];
                     CurrentFigureRow = 0;
                     CurrentFigureCol = 0;
-                    if (Collision())
+                    if (Collision(CurrentFigure))
                     {
                         File.AppendAllLines(ScoresFileName, new List<string>
                         {
@@ -175,6 +177,24 @@ namespace Tetris
             }
         }
 
+        private static void UpdateLevel()
+        {
+            if (Score <= 0)
+            {
+                Level = 1;
+                return;
+            }
+            Level = (int)Math.Log10(Score) - 1;
+            if (Level < 1)
+            {
+                Level = 1;
+            }
+            if (Level > 10)
+            {
+                Level = 10;
+            }
+        }
+
         private static void RotateCurrentFigure()
         {
             var newFigure = new bool[CurrentFigure.GetLength(1), CurrentFigure.GetLength(0)];
@@ -185,7 +205,12 @@ namespace Tetris
                     newFigure[col, CurrentFigure.GetLength(0) - row - 1] = CurrentFigure[row, col];
                 }
             }
-            CurrentFigure = newFigure;
+
+            if (!Collision(newFigure))
+            {
+                CurrentFigure = newFigure;
+            }
+            
         }
 
         private static int CheckForFullLines()
@@ -234,18 +259,22 @@ namespace Tetris
             }
         }
 
-        static bool Collision()
+        static bool Collision(bool [,] figure)
         {
-             if (CurrentFigureRow + CurrentFigure.GetLength(0)  == TetrisRows)
+            if (CurrentFigureCol > TetrisCols - figure.GetLength(1))
+            {
+                return true;
+            }
+            if (CurrentFigureRow + figure.GetLength(0)  == TetrisRows)
             {
                  return true;
             }
 
-            for (int row = 0; row < CurrentFigure.GetLength(0); row++)
+            for (int row = 0; row < figure.GetLength(0); row++)
             {
-                for (int col = 0; col < CurrentFigure.GetLength(1); col++)
+                for (int col = 0; col < figure.GetLength(1); col++)
                 {
-                    if (CurrentFigure[row,col] && TetrisField[CurrentFigureRow + row + 1, CurrentFigureCol + col])
+                    if (figure[row,col] && TetrisField[CurrentFigureRow + row + 1, CurrentFigureCol + col])
                     {
                         return true;
                     }
@@ -292,18 +321,19 @@ namespace Tetris
             {
                 HighScore = Score;
             }
-
-            Write("Score:", 1, 3 + TetrisCols);
-            Write(Score.ToString(), 2, 3 + TetrisCols);
-            Write("Best:", 4, 3 + TetrisCols);
-            Write(HighScore.ToString(), 5, 3 + TetrisCols);
-            Write("Frame:", 7, 3 + TetrisCols);
-            Write(Frame.ToString(), 8, 3 + TetrisCols);
-            Write("Position:", 10, 3 + TetrisCols);
-            Write($"{CurrentFigureRow}, {CurrentFigureCol}", 11, 3 + TetrisCols);
-            Write("Keys:", 13, 3 + TetrisCols);
-            Write($"    ^ ", 14, 3 + TetrisCols);
-            Write($" <  v  > ", 15, 3 + TetrisCols);
+            Write("Level:", 1, 3 + TetrisCols);
+            Write(Level.ToString(), 2, 3 + TetrisCols);
+            Write("Score:", 4, 3 + TetrisCols);
+            Write(Score.ToString(), 5, 3 + TetrisCols);
+            Write("Best:", 7, 3 + TetrisCols);
+            Write(HighScore.ToString(), 8, 3 + TetrisCols);
+            Write("Frame:", 10, 3 + TetrisCols);
+            Write(Frame.ToString() + " / " + (FramesToMoVeFigure - Level).ToString(), 11, 3 + TetrisCols);
+            Write("Position:", 13, 3 + TetrisCols);
+            Write($"{CurrentFigureRow}, {CurrentFigureCol}", 14, 3 + TetrisCols);
+            Write("Keys:", 16, 3 + TetrisCols);
+            Write($"    ^ ", 17, 3 + TetrisCols);
+            Write($" <  v  > ", 18, 3 + TetrisCols);
         }
 
         static void DrawTetrisField()
@@ -336,7 +366,7 @@ namespace Tetris
 
                     if (CurrentFigure[row, col])
                     {
-                        Write("*", row + 1 + CurrentFigureRow, col + 1 + CurrentFigureCol);
+                        Write("*", row + 1 + CurrentFigureRow, 1 + CurrentFigureCol + col);
                     }
                 }
             }
